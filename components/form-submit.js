@@ -3,10 +3,12 @@
 */
 'use client';
 
-import { useFormStatus } from "react-dom";
+// import { useFormStatus } from "react-dom";
+import { useActionState } from "react";
 
 export default function FormSubmit({ children, onSubmit }) {
-  const status = useFormStatus(); // ne peut etre utilise que dans un composant client
+  // const status = useFormStatus(); // ne peut etre utilise que dans un composant client
+  const status = useActionState(); // ne peut etre utilise que dans un composant client
 
   if (status.pending) {
     return <p>Creating post...</p>;
