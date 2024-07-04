@@ -6,7 +6,7 @@
 import { useFormStatus } from "react-dom";
 // import { useActionState } from "react";
 
-export default function FormSubmit({ children, onSubmit }) {
+export default function FormSubmit() {
   const status = useFormStatus(); // ne peut etre utilise que dans un composant client
   // const status = useActionState(); // ne peut etre utilise que dans un composant client
 
