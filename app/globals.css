@@ -142,6 +142,10 @@ main {
   color: #c882a2;
 }
 
+.input-error {
+  color: #a80a69;
+}
+
 .posts {
   display: flex;
   flex-direction: column;
