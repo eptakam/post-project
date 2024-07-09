@@ -56,6 +56,8 @@ export async function createPost(prevState, formData) {
     userId: 1,
   });
 
+  // revalider tous les chemins avant de rediriger l'utilisateur. pour pemettre a l'utilisateur de voir le post qu'il vient de creer et ainsi eviter de ne voir que les posts mis en cache
+  revalidatePath('/', 'layout'); 
   redirect("/feed"); // rediriger l'utilisateur vers la page feed
 }
 
@@ -63,5 +65,5 @@ export async function createPost(prevState, formData) {
 export async function togglePostLikeStatus(postId) {
   // appeler la fonction 'updatePostLikeStatus' qui est dans le fichier 'lib/posts.js' pour mettre a jour le statut du like
   await updatePostLikeStatus(postId, 2);
-  await revalidatePath('/', 'layout'); // revalider le chemin pour mettre a jour les donnees en cache
+  revalidatePath('/', 'layout'); // revalider le chemin pour mettre a jour les donnees en cache
 }
