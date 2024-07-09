@@ -1,7 +1,7 @@
 import Posts from '@/components/posts';
 import { getPosts } from '@/lib/posts';
 
-// jouter des meta data dynamiques a la page. Pour cela, nous utiliserons la fonction generateMetadata() qui prendra en argument le nombre de posts affiches sur la page. Cette fonction retournera un objet avec les proprietes title et description.
+// jouter des meta data dynamiques a la page. Pour cela, nous utiliserons la fonction generateMetadata(). Cette fonction retournera un objet avec les proprietes title et description.
 export async function generateMetadata() {
   const posts = await getPosts();
   const numberOfPosts = posts.length;

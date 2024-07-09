@@ -10,6 +10,7 @@ import { redirect } from "next/navigation";
 import { storePost } from "@/lib/posts";
 import { uploadImage } from "@/lib/cloudinary";
 import { updatePostLikeStatus } from "@/lib/posts";
+import { revalidatePath } from "next/cache";
 
 // vu que le server action 'createPost' est passee au hook useFormState() dans le composant PostForm via l'attribut action, formData n'est plus le premier argument mais le deuxieme. le premier argument etant prevState qui est l'etat precedent du formulaire. il faut donc l'ajouter dans la signature de la fonction createPost() sinon une erreur sera declenchee (formData.get is not a function).
 export async function createPost(prevState, formData) {
@@ -62,4 +63,5 @@ export async function createPost(prevState, formData) {
 export async function togglePostLikeStatus(postId) {
   // appeler la fonction 'updatePostLikeStatus' qui est dans le fichier 'lib/posts.js' pour mettre a jour le statut du like
   await updatePostLikeStatus(postId, 2);
+  await revalidatePath('/', 'layout'); // revalider le chemin pour mettre a jour les donnees en cache
 }
