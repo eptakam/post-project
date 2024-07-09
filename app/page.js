@@ -3,6 +3,12 @@ import { Suspense } from 'react';
 import Posts from '@/components/posts';
 import { getPosts } from '@/lib/posts';
 
+// ajouter des  meta donnees statiques a la page. il doit s'appeler 'metadata' et doit etre exporte en tant que constante
+export const metadata = {
+  title: "Latest Posts",
+  description: "Browse our latest posts!",
+};
+
 async function LatestPosts() {
   const latestPosts = await getPosts(2);
   return <Posts posts={latestPosts} />;
