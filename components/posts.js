@@ -1,4 +1,4 @@
-'use client'; 
+"use client";
 
 import { formatDate } from "@/lib/format";
 import LikeButton from "./like-icon";
@@ -14,14 +14,39 @@ import Image from "next/image";
     l'autorisation du chargement des images fait, nous rencontrons un autre probleme: les images sont chargees en full screen a cause de l'attribut 'fill'. pour resoudre ce probleme, nous devons ajouter une classe CSS pour definir la taille de l'image dans un conteiner contenant l'image. le container parent de l'image doit avoir:
       - une position relative.
       - une taille definie.
+
+    Cloudinary nous permet manipuler l'url des images et d'ajouter certaines extra configurations qui feront en sorte que Cloudinary genere plusieurs versions d'un fichier image, les cache et les serve ces differentes versions a notre application.
+
+    on utilise ces capacites de Cloudinary via le props 'loader'. le props 'loader' qui prend comme valeur une fonction (imageLoader) qui retourne une chaine de caractere representant l'url de l'image a charger.
+
+    nous pouvons nous meme definir une qualite de l'image (quality={50})
+
+    pour generer un url different pour chaque image, nous devons separer l'url generee par Cloudinary en deux parties: une partie representant le nom de l'image et l'autre partie representant tout l'url jusqu'a /upload/. 
+
+    pour finir, nous allons enlever le props 'fill' et ajouter les props 'width' et 'height' pour definir la taille de l'image. car sinon, il nous faudra definir au moins un element pour le props 'sizes' pour eviter le warning au niveau du browser.
 */
+
+function imageLoader(config) {
+  const urlStart = config.src.split("upload/")[0];
+  const urlEnd = config.src.split("upload/")[1];
+  // const transfomtions = `w_200,h_150,q_${config.quality}`;
+  const transfomtions = `w_200,q_${config.quality}`; // pour eviter la distorsion de l'image, on ne definit que la largeur de l'image
+  return `${urlStart}upload/${transfomtions}/${urlEnd}`;
+}
 
 function Post({ post, action }) {
   return (
     <article className="post">
       <div className="post-image">
         {/* <img src={post.image} alt={post.title} /> */}
-        <Image src={post.image} fill alt={post.title} />
+        <Image
+          loader={imageLoader}
+          src={post.image}
+          width={200}
+          height={120}
+          alt={post.title}
+          quality={50}
+        />
       </div>
       <div className="post-content">
         <header>
@@ -44,7 +69,10 @@ function Post({ post, action }) {
                 - le premier argument represente la valeur de 'this' dans la fonction 'togglePostLikeStatus'. ici, nous n'avons pas besoin de definir la valeur de 'this' donc nous passons null.
                 - le deuxieme argument sera la nouvelle premiere valeur de la fonction 'togglePostLikeStatus' lorsqu'elle sera executee dans le futur. ici, nous passons post.id pour definir la valeur de postId.
             */}
-            <form action={action.bind(null, post.id)} className={post.isLiked ? 'liked' : ''}>
+            <form
+              action={action.bind(null, post.id)}
+              className={post.isLiked ? "liked" : ""}
+            >
               <LikeButton />
             </form>
           </div>
@@ -56,7 +84,7 @@ function Post({ post, action }) {
 }
 
 export default function Posts({ posts }) {
-/*
+  /*
  pour annuler le temps d'attente qu'il y a avant la mise a jour, par exemple lorsqu'on like un post, en plus d'utiliser la fonction revalidatePath() de 'next/cache', nous allons utiliser le hook 'optimistic' de 'react'. 
 
  hook 'useOptimistic()' prend deux arguments:
@@ -78,29 +106,34 @@ le hook 'useOptimistic()' retourne un tableau avec deux elements:
     terminer en ajoutant 'use client' au-dessus de tous les composants pour pouvoir utiliser le hook 'useOptimistic()'.
 */
 
+  const [optimisticPosts, updatedOptimisticPosts] = useOptimistic(
+    posts,
+    (prevPosts, updatedPostId) => {
+      // trouver l'index du post qui sera mis a jour
+      const updatedPostIndex = prevPosts.findIndex(
+        (post) => post.id === updatedPostId
+      );
 
-const [optimisticPosts, updatedOptimisticPosts] = useOptimistic(posts, (prevPosts, updatedPostId) =>{
-  // trouver l'index du post qui sera mis a jour
-  const updatedPostIndex = prevPosts.findIndex((post) => post.id === updatedPostId);  
+      // verifier si un post a ete mis a jour
+      if (updatedPostIndex === -1) {
+        return prevPosts;
+      }
 
-  // verifier si un post a ete mis a jour
-  if (updatedPostIndex === -1) {
-    return prevPosts;
-  }
+      // creer une copie de la liste des posts dans un nouvel objet
+      const updatedPosts = { ...prevPosts[updatedPostIndex] };
 
-  // creer une copie de la liste des posts dans un nouvel objet
-  const updatedPosts = {...prevPosts[updatedPostIndex]};
+      // mettre a jour le nombre de likes et le statut du like
+      updatedPosts.likes =
+        updatedPosts.isLiked + (updatedPosts.isLiked ? -1 : 1);
+      updatedPosts.isLiked = !updatedPosts.isLiked; // inverser le statut du like (true -> false, false -> true)
 
-  // mettre a jour le nombre de likes et le statut du like
-  updatedPosts.likes = updatedPosts.isLiked + (updatedPosts.isLiked ? - 1 : 1);
-  updatedPosts.isLiked = !updatedPosts.isLiked; // inverser le statut du like (true -> false, false -> true)
+      // creer une nouvelle liste de posts avec le post mis a jour
+      const newPosts = [...prevPosts];
+      newPosts[updatedPostIndex] = updatedPosts;
 
-  // creer une nouvelle liste de posts avec le post mis a jour
-  const newPosts = [...prevPosts];
-  newPosts[updatedPostIndex] = updatedPosts;
-
-  return newPosts;
-})
+      return newPosts;
+    }
+  );
 
   if (!optimisticPosts || optimisticPosts.length === 0) {
     return <p>There are no posts yet. Maybe start sharing some?</p>;
@@ -116,7 +149,7 @@ const [optimisticPosts, updatedOptimisticPosts] = useOptimistic(posts, (prevPost
     <ul className="posts">
       {optimisticPosts.map((post) => (
         <li key={post.id}>
-          <Post post={post} action={updatedPost}/>
+          <Post post={post} action={updatedPost} />
         </li>
       ))}
     </ul>
