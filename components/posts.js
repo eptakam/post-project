@@ -4,12 +4,24 @@ import { formatDate } from "@/lib/format";
 import LikeButton from "./like-icon";
 import { togglePostLikeStatus } from "@/actions/posts";
 import { useOptimistic } from "react";
+import Image from "next/image";
+
+/*
+    Nous desirons optimiser les images qui seront generees par les utilisateurs en utilisant le composant Image de 'next/image'. le probleme est que les images peuvent etre de tailles differentes et nous ne pouvons pas definir une taille fixe pour toutes les images. pour resoudre ce probleme, nous utiliserons l'attribut 'fill'
+
+    en ajoutant cet attribut 'fill', nous avons un autre probleme du au fait que NextJs pas securite bloque le chargement d'image. car nous utilisons un lien externe pour charger les images. pour resoudre ce probleme, nous devons ajouter le lien de l'image dans le fichier 'next.config.mjs' pour autoriser le chargement des images.
+
+    l'autorisation du chargement des images fait, nous rencontrons un autre probleme: les images sont chargees en full screen a cause de l'attribut 'fill'. pour resoudre ce probleme, nous devons ajouter une classe CSS pour definir la taille de l'image dans un conteiner contenant l'image. le container parent de l'image doit avoir:
+      - une position relative.
+      - une taille definie.
+*/
 
 function Post({ post, action }) {
   return (
     <article className="post">
       <div className="post-image">
-        <img src={post.image} alt={post.title} />
+        {/* <img src={post.image} alt={post.title} /> */}
+        <Image src={post.image} fill alt={post.title} />
       </div>
       <div className="post-content">
         <header>

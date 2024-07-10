@@ -13,6 +13,7 @@ export default function Header() {
           // definir le width et height lorsqu'on aura une taille d'image fixe peu importe la taille de l'ecran
           width={100}
           height={100}
+          priority={true} // afficher l'image en priorite apres le chargement de la page
           // sizes="10vw"  // 10% of the viewport width. pratique recommandee pour l'optimisation de l'image
           alt="Mobile phone with posts feed on it"
         />
